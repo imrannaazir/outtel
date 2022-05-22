@@ -23,7 +23,20 @@ async function run() {
         await client.connect();
         // create collections
         const userCollection = client.db("outtel").collection("users")
+        //put user api
 
+        app.put('/users/:email', async (req, res) => {
+            const email = req.params.email;
+            console.log(email);
+            const query = { email: email }
+            const updatedUser = {
+                $set: query
+            }
+            const option = { upsert: true }
+            const result = await userCollection.updateOne(query, updatedUser, option)
+            const token = jwt.sign({ email: email }, process.env.ACCESS_TOKEN, { expiresIn: '1h' })
+            res.send({ result, token });
+        })
     }
 
     finally {
