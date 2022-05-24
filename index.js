@@ -23,8 +23,23 @@ async function run() {
         await client.connect();
         // create collections
         const userCollection = client.db("outtel").collection("users")
-        //put user api
+        const partCollection = client.db("outtel").collection("parts")
 
+        //get all services api
+        app.get('/parts', async (req, res) => {
+            const query = {};
+            const parts = await partCollection.find(query).toArray();
+            res.send(parts);
+        });
+
+        //post api for parts
+        app.post('/parts', async (req, res) => {
+            const newParts = req.body;
+            const result = await partCollection.insertOne(newParts);
+            res.send(result);
+        });
+
+        //put user api
         app.put('/users/:email', async (req, res) => {
             const email = req.params.email;
             console.log(email);
