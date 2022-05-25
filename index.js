@@ -116,6 +116,14 @@ async function run() {
             const result = await userCollection.updateOne(query, updatedDoc, options)
             res.send(result);
         })
+
+        //delete a part api
+        app.delete('/parts/:id', async (req, res) => {
+            const id = req.params.id
+            const query = { _id: ObjectId(id) }
+            const result = await partCollection.deleteOne(query)
+            res.send(result)
+        })
     }
 
     finally {
