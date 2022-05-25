@@ -31,7 +31,12 @@ async function run() {
             const parts = await (await partCollection.find(query).toArray()).reverse();
             res.send(parts);
         });
-
+        //get all services api
+        app.get('/users', async (req, res) => {
+            const query = {};
+            const users = await (await userCollection.find(query).toArray());
+            res.send(users);
+        });
 
         //post api for parts
         app.post('/parts', async (req, res) => {
