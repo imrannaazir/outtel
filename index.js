@@ -5,7 +5,7 @@ const port = process.env.PORT || 5000;
 const cors = require('cors');
 require("dotenv").config();
 const jwt = require('jsonwebtoken');
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 
 // middle ware
 app.use(cors());
@@ -55,6 +55,21 @@ async function run() {
             res.send(users);
         });
 
+        //get a services api
+        app.get('/users/:email', async (req, res) => {
+            const email = req.params.email
+            const query = { email: email }
+            const users = await (userCollection.find(query).toArray());
+            res.send(users);
+        });
+        //get a services api
+        app.get('/parts/:id', async (req, res) => {
+            const id = req.params.id
+            const query = { _id: ObjectId(id) }
+            const part = await (partCollection.find(query).toArray());
+            res.send(part);
+        });
+
         //post api for parts
         app.post('/parts', async (req, res) => {
             const newParts = req.body;
@@ -94,11 +109,11 @@ async function run() {
             console.log(email);
             const updatedUser = req.body;
             const query = { email: email }
+            const options = { upsert: true }
             const updatedDoc = {
                 $set: updatedUser
             }
-            const option = { upsert: true }
-            const result = await userCollection.updateOne(query, updatedDoc, option)
+            const result = await userCollection.updateOne(query, updatedDoc, options)
             res.send(result);
         })
     }
