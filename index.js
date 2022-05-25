@@ -28,9 +28,10 @@ async function run() {
         //get all services api
         app.get('/parts', async (req, res) => {
             const query = {};
-            const parts = await partCollection.find(query).toArray();
+            const parts = await (await partCollection.find(query).toArray()).reverse();
             res.send(parts);
         });
+
 
         //post api for parts
         app.post('/parts', async (req, res) => {
@@ -51,6 +52,19 @@ async function run() {
             const result = await userCollection.updateOne(query, updatedUser, option)
             const token = jwt.sign({ email: email }, process.env.ACCESS_TOKEN, { expiresIn: '1h' })
             res.send({ result, token });
+        })
+        //put user api
+        app.put('/update-users/:email', async (req, res) => {
+            const email = req.params.email;
+            console.log(email);
+            const updatedUser = req.body;
+            const query = { email: email }
+            const updatedDoc = {
+                $set: updatedUser
+            }
+            const option = { upsert: true }
+            const result = await userCollection.updateOne(query, updatedDoc, option)
+            res.send(result);
         })
     }
 
