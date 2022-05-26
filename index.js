@@ -56,6 +56,13 @@ async function run() {
             res.send(users);
         });
 
+        // get all orders
+        app.get('/orders', async (req, res) => {
+            const query = {};
+            const orders = await (await orderCollection.find(query).toArray());
+            res.send(orders);
+        });
+
         //get a services api
         app.get('/users/:email', async (req, res) => {
             const email = req.params.email
@@ -120,6 +127,16 @@ async function run() {
                 $set: updatedUser
             }
             const result = await userCollection.updateOne(query, updatedDoc)
+            res.send(result);
+        })
+        //put user api
+        app.put('/orders/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) }
+            const updatedDoc = {
+                $set: { status: "delivered" },
+            }
+            const result = await orderCollection.updateOne(query, updatedDoc)
             res.send(result);
         })
 
