@@ -41,6 +41,7 @@ async function run() {
         // create collections
         const userCollection = client.db("outtel").collection("users")
         const partCollection = client.db("outtel").collection("parts")
+        const orderCollection = client.db("outtel").collection("orders")
 
         //get all services api
         app.get('/parts', async (req, res) => {
@@ -76,6 +77,12 @@ async function run() {
             const result = await partCollection.insertOne(newParts);
             res.send(result);
         });
+        //post api for newOrder
+        app.post('/orders', async (req, res) => {
+            const newOrder = req.body;
+            const result = await orderCollection.insertOne(newOrder);
+            res.send(result);
+        });
 
         //put user api
         app.put('/users/:email', async (req, res) => {
@@ -109,11 +116,10 @@ async function run() {
             console.log(email);
             const updatedUser = req.body;
             const query = { email: email }
-            const options = { upsert: true }
             const updatedDoc = {
                 $set: updatedUser
             }
-            const result = await userCollection.updateOne(query, updatedDoc, options)
+            const result = await userCollection.updateOne(query, updatedDoc)
             res.send(result);
         })
 
