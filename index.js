@@ -6,6 +6,8 @@ const cors = require('cors');
 require("dotenv").config();
 const jwt = require('jsonwebtoken');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+const stripe = require('stripe')("sk_test_51L3iK7LV5ePzXyiLRAdfym8o43gTES75OYg3mEbjksNIlysOC5vr15pKAe5t9mEFG7iQn76mnUoJRDG9St7tcVHN00INNZb8YM")
+
 
 // middle ware
 app.use(cors());
@@ -20,7 +22,7 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 //jwt token function
 function verifyJWT(req, res, next) {
     const authHeader = req.headers.authorization;
-    console.log(authHeader);
+
     if (!authHeader) {
         return res.status(401).send({ message: 'UnAuthorized access' });
     }
@@ -30,7 +32,6 @@ function verifyJWT(req, res, next) {
             return res.status(403).send({ message: 'Forbidden access' })
         }
         req.decoded = decoded;
-        console.log(decoded);
         next();
     });
 }
@@ -44,6 +45,7 @@ async function run() {
         const partCollection = client.db("outtel").collection("parts")
         const orderCollection = client.db("outtel").collection("orders")
         const feedbackCollection = client.db("outtel").collection("feedbacks")
+        const paymentCollection = client.db("outtel").collection("payments")
 
         //get all services api
         app.get('/parts', async (req, res) => {
@@ -76,6 +78,14 @@ async function run() {
             const orders = await (await (await orderCollection.find(query).toArray()).reverse());
             res.send(orders);
         });
+
+        // get a orders by id
+        /*  app.get('/orders/:id', async (req, res) => {
+             const id = req.params.id
+             const query = { email: email };
+             const reviews = await feedbackCollection.find(query).toArray();
+             res.send(reviews);
+         }); */
 
         //get a services api
         app.get('/users/:email', async (req, res) => {
@@ -136,7 +146,6 @@ async function run() {
         //put user api
         app.put('/users/:email', async (req, res) => {
             const email = req.params.email;
-            console.log(email);
             const query = { email: email }
             const updatedUser = {
                 $set: query
@@ -150,7 +159,6 @@ async function run() {
         //put admin api
         app.put('/users/admin/:email', async (req, res) => {
             const email = req.params.email;
-            console.log("email bro", email);
             const query = { email: email }
             const updatedDoc = {
                 $set: { role: 'admin' }
@@ -160,16 +168,19 @@ async function run() {
 
         })
         //put user api
-        app.patch('/update-users/:email', async (req, res) => {
+        app.put('/update-users/:email', async (req, res) => {
             const email = req.params.email;
-            console.log(email);
             const updatedUser = req.body;
+            console.log(updatedUser);
             const query = { email: email }
             const updatedDoc = {
                 $set: updatedUser
             }
             const result = await userCollection.updateOne(query, updatedDoc)
+            console.log(result);
             res.send(result);
+
+
         })
         //put user api
         app.put('/orders/:id', async (req, res) => {
@@ -196,6 +207,56 @@ async function run() {
             const result = await orderCollection.deleteOne(query)
             res.send(result)
         })
+
+
+
+
+
+        //================================Payment API
+
+        app.get('/get-orders/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const order = await orderCollection.findOne(query);
+            res.send(order);
+        })
+        //-----------------------------------------PAYMENT
+
+        app.post("/create-payment-intent", async (req, res) => {
+            const order = req.body;
+            const price = order.price;
+            const amount = price * 100;
+            const paymentIntent = await stripe.paymentIntents.create({
+                amount: amount,
+                currency: "usd",
+                payment_method_types: ["card"],
+            });
+
+            res.send({ clientSecret: paymentIntent.client_secret });
+        });
+
+        // payment patch
+
+        app.patch('/orders/:id', async (req, res) => {
+            const id = req.params.id;
+            const payment = req.body;
+            const filter = { _id: ObjectId(id) };
+            const updatedDoc = {
+                $set: {
+                    paid: true,
+                    transactionId: payment.transactionId
+                }
+            }
+
+            const result = await paymentCollection.insertOne(payment);
+            const updatedBooking = await orderCollection.updateOne(filter, updatedDoc);
+
+            res.send(updatedBooking);
+        })
+
+
+
+
     }
 
     finally {
