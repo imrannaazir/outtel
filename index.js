@@ -62,6 +62,12 @@ async function run() {
             const reviews = await feedbackCollection.find(query).toArray();
             res.send(reviews);
         });
+        app.get('/reviews/:email', async (req, res) => {
+            const email = req.params.email
+            const query = { email: email };
+            const reviews = await feedbackCollection.find(query).toArray();
+            res.send(reviews);
+        });
 
         // get all orders
         app.get('/orders', async (req, res) => {
