@@ -30,6 +30,7 @@ function verifyJWT(req, res, next) {
             return res.status(403).send({ message: 'Forbidden access' })
         }
         req.decoded = decoded;
+        console.log(decoded);
         next();
     });
 }
@@ -83,6 +84,14 @@ async function run() {
             const users = await userCollection.findOne(query);
             res.send(users);
         });
+        // check admin
+        app.get('/admin/:email', async (req, res) => {
+            const email = req.params.email;
+            const query = { email: email }
+            const user = await userCollection.findOne(query);
+            const isAdmin = user?.role === 'admin'
+            res.send({ isAdmin })
+        })
         //get a order for a user api
         app.get('/orders/:email', async (req, res) => {
             const email = req.params.email
@@ -139,7 +148,7 @@ async function run() {
         })
 
         //put admin api
-        app.put('/users/admin/:email', verifyJWT, async (req, res) => {
+        app.put('/users/admin/:email', async (req, res) => {
             const email = req.params.email;
             console.log("email bro", email);
             const query = { email: email }
