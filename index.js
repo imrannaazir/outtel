@@ -77,6 +77,13 @@ async function run() {
             const orders = await ((await orderCollection.find(query).toArray()).reverse());
             res.send(orders);
         });
+        //get user image
+        app.get('/user-image/:email', async (req, res) => {
+            const email = req.params.email
+            const query = { email: email }
+            const result = await ((await userCollection.findOne(query)));
+            res.send({ image: result?.photoURL });
+        });
         //get a services api
         app.get('/parts/:id', async (req, res) => {
             const id = req.params.id
