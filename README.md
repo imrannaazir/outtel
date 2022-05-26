@@ -1,4 +1,4 @@
-## OutTel Server - [Live link](https://outtel-tech.web.app/)
+## OutTel Server - [Live link](https://rocky-waters-98626.herokuapp.com/)
 
 - This server made with express js.
 - For authorization used JWT
