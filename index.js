@@ -42,6 +42,7 @@ async function run() {
         const userCollection = client.db("outtel").collection("users")
         const partCollection = client.db("outtel").collection("parts")
         const orderCollection = client.db("outtel").collection("orders")
+        const feedbackCollection = client.db("outtel").collection("feedbacks")
 
         //get all services api
         app.get('/parts', async (req, res) => {
@@ -102,6 +103,12 @@ async function run() {
         app.post('/orders', async (req, res) => {
             const newOrder = req.body;
             const result = await orderCollection.insertOne(newOrder);
+            res.send(result);
+        });
+        //post api for feedbacks
+        app.post('/feedbacks', async (req, res) => {
+            const newFeedback = req.body;
+            const result = await feedbackCollection.insertOne(newFeedback);
             res.send(result);
         });
 
