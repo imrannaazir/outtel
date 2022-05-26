@@ -56,6 +56,12 @@ async function run() {
             const users = await (await userCollection.find(query).toArray());
             res.send(users);
         });
+        //get all reviews api
+        app.get('/reviews', async (req, res) => {
+            const query = {};
+            const reviews = await feedbackCollection.find(query).toArray();
+            res.send(reviews);
+        });
 
         // get all orders
         app.get('/orders', async (req, res) => {
@@ -68,7 +74,7 @@ async function run() {
         app.get('/users/:email', async (req, res) => {
             const email = req.params.email
             const query = { email: email }
-            const users = await (userCollection.find(query).toArray());
+            const users = await userCollection.findOne(query);
             res.send(users);
         });
         //get a order for a user api
@@ -139,7 +145,7 @@ async function run() {
 
         })
         //put user api
-        app.put('/update-users/:email', async (req, res) => {
+        app.patch('/update-users/:email', async (req, res) => {
             const email = req.params.email;
             console.log(email);
             const updatedUser = req.body;
