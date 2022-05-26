@@ -59,7 +59,7 @@ async function run() {
         // get all orders
         app.get('/orders', async (req, res) => {
             const query = {};
-            const orders = await (await orderCollection.find(query).toArray());
+            const orders = await (await (await orderCollection.find(query).toArray()).reverse());
             res.send(orders);
         });
 
@@ -69,6 +69,13 @@ async function run() {
             const query = { email: email }
             const users = await (userCollection.find(query).toArray());
             res.send(users);
+        });
+        //get a order for a user api
+        app.get('/orders/:email', async (req, res) => {
+            const email = req.params.email
+            const query = { email: email }
+            const orders = await ((await orderCollection.find(query).toArray()).reverse());
+            res.send(orders);
         });
         //get a services api
         app.get('/parts/:id', async (req, res) => {
@@ -145,6 +152,13 @@ async function run() {
             const id = req.params.id
             const query = { _id: ObjectId(id) }
             const result = await partCollection.deleteOne(query)
+            res.send(result)
+        })
+        //delete a unpaid order api
+        app.delete('/orders/:id', async (req, res) => {
+            const id = req.params.id
+            const query = { _id: ObjectId(id) }
+            const result = await orderCollection.deleteOne(query)
             res.send(result)
         })
     }
