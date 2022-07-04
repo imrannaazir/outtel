@@ -18,7 +18,7 @@ app.use(express.json());
 
 const uri = `mongodb+srv://${process.env.USER}:${process.env.PASSWORD}@cluster0.aoiar.mongodb.net/?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
-
+console.log(uri);
 //jwt token function
 function verifyJWT(req, res, next) {
     const authHeader = req.headers.authorization;
@@ -47,11 +47,25 @@ async function run() {
         const feedbackCollection = client.db("outtel").collection("feedbacks")
         const paymentCollection = client.db("outtel").collection("payments")
 
-        //get all services api
+        //get all parts api
         app.get('/parts', async (req, res) => {
             const query = {};
             const parts = await (await partCollection.find(query).toArray()).reverse();
             res.send(parts);
+        });
+        //get all processors api
+        app.get('/processors', async (req, res) => {
+            const query = { category: "processors" }
+            const processors = await partCollection.find(query).toArray()
+            console.log(processors);
+            res.send(processors)
+        });
+        //get all processors api
+        app.get('/graphics_cards', async (req, res) => {
+            const query = { category: "graphics cards" }
+            const processors = await partCollection.find(query).toArray()
+            console.log(processors);
+            res.send(processors)
         });
         //get all services api
         app.get('/users', async (req, res) => {
@@ -152,8 +166,8 @@ async function run() {
             }
             const option = { upsert: true }
             const result = await userCollection.updateOne(query, updatedUser, option)
-            const token = jwt.sign({ email: email }, process.env.ACCESS_TOKEN, { expiresIn: '1h' })
-            res.send({ result, token });
+            const token = jwt.sign({ email: email }, process.env.ACCESS_TOKEN, { expiresIn: '1d' })
+            res.send(result);
         })
 
         //put admin api
